@@ -37,7 +37,7 @@ export class AuthService {
         const { password, ...newUser } = await this.usersService.create({ ...registerDto, password: hashedPassword });
         return {
             user: newUser,
-            accessToken: this._generateTokenProvider.generateAccessToken({ email: user.email, sub: user.id, name: user.name }),
+            accessToken: this._generateTokenProvider.generateAccessToken({ email: newUser.email, sub: newUser.id, name: newUser.name }),
         };
     }
 }

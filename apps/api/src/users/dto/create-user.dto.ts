@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Prisma } from "@prisma/client";
-import { IsEmail, IsString } from "class-validator";
+import { IsDefined, IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateUserDto implements Prisma.UserCreateInput {
     @ApiProperty({
@@ -8,6 +8,8 @@ export class CreateUserDto implements Prisma.UserCreateInput {
         example: 'john.doe@example.com',
     })
     @IsEmail()
+    @IsDefined()
+    @IsNotEmpty()
     email: string;
 
     @ApiProperty({
@@ -15,6 +17,8 @@ export class CreateUserDto implements Prisma.UserCreateInput {
         example: 'John Doe',
     })
     @IsString()
+    @IsDefined()
+    @IsNotEmpty()
     name: string;
 
     @ApiProperty({
@@ -22,5 +26,7 @@ export class CreateUserDto implements Prisma.UserCreateInput {
         example: 'password',
     })
     @IsString()
+    @IsDefined()
+    @IsNotEmpty()
     password: string;
 }

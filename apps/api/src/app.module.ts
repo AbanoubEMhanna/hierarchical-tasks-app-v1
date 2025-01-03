@@ -5,6 +5,7 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { GlobalModule } from './global/global.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    GlobalModule,
   ],
   controllers: [],
   providers: [],
