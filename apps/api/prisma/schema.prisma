@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  tasks    Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  description         String?   @db.Text
+  owner               String
+  startDate           DateTime
+  completionPercentage Int
+  customFields        Json?     @default("{}")
+  parentId            Int?
+  parent              Task?     @relation("TaskHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children            Task[]    @relation("TaskHierarchy")
+  userId              Int
+  user                User      @relation(fields: [userId], references: [id])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([parentId])
+  @@index([userId])
+}
+
+model CustomField {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      FieldType
+  options   Json?
+  createdAt DateTime @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+enum FieldType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+}

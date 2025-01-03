@@ -38,6 +38,12 @@ $ pnpm install
 # development
 $ pnpm run start
 
+# database sync migrations in first time
+$ npx prisma db push 
+
+# database new migrations
+$ npx prisma migrate dev --name name-of-migration
+
 # watch mode
 $ pnpm run start:dev
 
