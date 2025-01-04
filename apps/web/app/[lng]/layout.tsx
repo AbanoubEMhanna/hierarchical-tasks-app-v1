@@ -12,7 +12,7 @@ export async function generateStaticParams() {
   return languages.map((lng) => ({ lng }));
 }
 
-export async function generateMetadata({ params: { lng } }: { params: { lng: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { lng: string } }): Promise<Metadata> {
   return {
     title: 'Task Manager',
   };
@@ -20,7 +20,7 @@ export async function generateMetadata({ params: { lng } }: { params: { lng: str
 
 export default async function LngLayout({
   children,
-  params: { lng }
+  params,
 }: {
   children: React.ReactNode;
   params: { lng: string };

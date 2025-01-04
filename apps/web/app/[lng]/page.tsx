@@ -15,7 +15,7 @@ export default async function Dashboard() {
     <div>
       <Navbar />
       <main className="container mx-auto px-4 py-8">
-        <TaskGrid />
+        <TaskGrid session={session} />
       </main>
     </div>
   );

@@ -2,20 +2,21 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { useSession } from 'next-auth/react';
 import { Task } from '../../types/task';
 import { socket } from '../../lib/socket';
 import { toast } from 'react-toastify';
+import { Session } from 'next-auth';
+import axios from 'axios';
 
 interface AddTaskDialogProps {
   open: boolean;
   onClose: () => void;
   parentTask?: Task | null;
+  session: Session | null;
 }
 
-export default function AddTaskDialog({ open, onClose, parentTask }: AddTaskDialogProps) {
+export default function AddTaskDialog({ open, onClose, parentTask , session}: AddTaskDialogProps) {
   const { t } = useTranslation();
-  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -33,23 +34,19 @@ export default function AddTaskDialog({ open, onClose, parentTask }: AddTaskDial
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.user.accessToken}`,
-        },
-        body: JSON.stringify({
+      const { data: newTask } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/tasks`,
+        {
           ...formData,
           parentId: parentTask?.id,
-        }),
-      });
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${session.user.accessToken}`,
+          },
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to create task');
-      }
-
-      const newTask = await response.json();
       socket.emit('createTask', newTask);
       toast.success('Task created successfully');
       onClose();

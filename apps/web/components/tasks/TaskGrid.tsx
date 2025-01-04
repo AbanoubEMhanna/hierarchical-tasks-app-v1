@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useTranslation } from 'next-i18next';
 import { Task } from '../../types/task';
 import { socket } from '../../lib/socket';
@@ -9,9 +8,11 @@ import TaskActions from './TaskActions';
 import AddTaskDialog from './AddTaskDialog';
 import CustomFieldsDialog from './CustomFieldsDialog';
 import RTLWrapper from '../../components/RTLWrapper';
+import { toast } from 'react-toastify';
+import { Session } from 'next-auth';
+import axios from 'axios';
 
-export default function TaskGrid() {
-  const { data: session } = useSession();
+export default function TaskGrid({session}: {session: Session | null}) {
   const { t, i18n } = useTranslation();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,18 +39,16 @@ export default function TaskGrid() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
+      setLoading(true);
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
         headers: {
           Authorization: `Bearer ${session.user.accessToken}`,
         },
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
-      }
-      const data = await response.json();
       setTasks(data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      toast.error(t('Error fetching tasks'));
     } finally {
       setLoading(false);
     }
@@ -202,10 +201,12 @@ export default function TaskGrid() {
         </div>
 
         <AddTaskDialog
+          session={session}
           open={openAddDialog}
           onClose={() => {
             setOpenAddDialog(false);
             setSelectedTask(null);
+            fetchTasks();
           }}
           parentTask={selectedTask}
         />

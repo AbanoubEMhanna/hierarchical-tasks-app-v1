@@ -37,7 +37,6 @@ export default function Register() {
       });
 
       if (response.data) {
-        toast.success(t('Registration successful'));
         router.push('/login');
       }
     } catch (error) {

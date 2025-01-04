@@ -20,9 +20,9 @@ export const authOptions: AuthOptions = {
 
           if (response.data) {
             return {
-              id: response.data.id,
-              email: response.data.email,
-              name: response.data.name,
+              id: response.data.user.id,
+              email: response.data.user.email,
+              name: response.data.user.name,
               accessToken: response.data.accessToken,
             };
           }
@@ -40,12 +40,18 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.accessToken;
+        token.sub = user.id?.toString();
+        token.name = user.name;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.accessToken = token.accessToken as string;
+        session.user.id = parseInt(token.sub as string);
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
       }
       return session;
     },

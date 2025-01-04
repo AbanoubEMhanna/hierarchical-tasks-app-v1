@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import SessionProvider from "../components/SessionProvider";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import Toaster from "../components/Toaster";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,10 +18,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionProvider session={session}>
-          {children}
-          <Toaster />
-        </SessionProvider>
+        <Suspense fallback={null}>
+          <SessionProvider session={session}>
+            {children}
+            <Toaster />
+          </SessionProvider>
+        </Suspense>
       </body>
     </html>
   );
