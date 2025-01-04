@@ -91,6 +91,28 @@ export default function TaskGrid({session}: {session: Session | null}) {
     setOpenAddDialog(true);
   };
 
+  const handleDeleteTask = async (taskId: number) => {
+    if (!session?.user?.accessToken) {
+      console.error('No access token found');
+      return;
+    }
+
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${session.user.accessToken}`,
+        },
+      });
+      
+      // Remove task from local state
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      toast.success(t('Task deleted successfully'));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast.error(t('Error deleting task'));
+    }
+  };
+
   const renderTaskRow = (task: Task, level = 0) => (
     <React.Fragment key={task.id}>
       <tr className="hover:bg-gray-50">
@@ -105,7 +127,8 @@ export default function TaskGrid({session}: {session: Session | null}) {
         <td className="px-6 py-4">
           <div className="line-clamp-2">{task.description}</div>
         </td>
-        <td className="px-6 py-4 whitespace-nowrap">{task.owner}</td>
+        <td className="px-6 py-4 whitespace-nowrap">{task.owner.name}</td>
+        <td className="px-6 py-4 whitespace-nowrap">{task.user.name}</td>
         <td className="px-6 py-4 whitespace-nowrap">
           {new Date(task.startDate).toLocaleDateString(i18n.language, {
             year: 'numeric',
@@ -129,6 +152,7 @@ export default function TaskGrid({session}: {session: Session | null}) {
             task={task}
             onEdit={() => handleEditTask(task)}
             onAddSubtask={() => handleAddSubtask(task)}
+            onDelete={() => handleDeleteTask(task.id)}
           />
         </td>
       </tr>
@@ -168,6 +192,9 @@ export default function TaskGrid({session}: {session: Session | null}) {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('Owner')}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('User')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('Start Date')}

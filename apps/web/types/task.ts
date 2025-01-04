@@ -2,7 +2,18 @@ export interface Task {
   id: number;
   name: string;
   description?: string;
-  owner: string;
+  owner: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  userId: number;
+  ownerId: number;
   startDate: string;
   completionPercentage: number;
   customFields?: Record<string, any>;

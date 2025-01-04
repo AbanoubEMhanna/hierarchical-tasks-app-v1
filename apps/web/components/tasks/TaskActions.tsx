@@ -6,9 +6,10 @@ interface TaskActionsProps {
   task: Task;
   onEdit: () => void;
   onAddSubtask: () => void;
+  onDelete: () => void;
 }
 
-export default function TaskActions({ task, onEdit, onAddSubtask }: TaskActionsProps) {
+export default function TaskActions({ task, onEdit, onAddSubtask , onDelete }: TaskActionsProps) {
   return (
     <div className="flex gap-2">
       <button
@@ -22,6 +23,12 @@ export default function TaskActions({ task, onEdit, onAddSubtask }: TaskActionsP
         className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
       >
         Add Subtask
+      </button>
+      <button
+        onClick={onDelete}
+        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Delete
       </button>
     </div>
   );
