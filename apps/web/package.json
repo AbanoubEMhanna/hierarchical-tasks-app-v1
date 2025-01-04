@@ -13,10 +13,13 @@
   "dependencies": {
     "@repo/ui": "workspace:*",
     "axios": "^1.7.9",
+    "i18next": "^23.16.8",
     "next": "^15.1.0",
     "next-auth": "^4.24.11",
+    "next-i18next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-i18next": "^14.0.0",
     "react-toastify": "^11.0.2",
     "socket.io-client": "^4.8.1"
   },

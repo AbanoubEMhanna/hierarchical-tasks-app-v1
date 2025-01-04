@@ -23,6 +23,7 @@ export const authOptions: AuthOptions = {
               id: response.data.id,
               email: response.data.email,
               name: response.data.name,
+              accessToken: response.data.accessToken,
             };
           }
           return null;
@@ -35,8 +36,22 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.accessToken = user.accessToken;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.accessToken = token.accessToken as string;
+      }
+      return session;
+    },
+  },
   pages: {
-    signIn: "/login",
+    signIn: "/en/login",
   },
   session: {
     strategy: "jwt",

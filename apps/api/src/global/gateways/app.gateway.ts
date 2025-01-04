@@ -1,34 +1,38 @@
-import { Logger } from '@nestjs/common';
 import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
+  SubscribeMessage,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Task } from '@prisma/client';
 
-@WebSocketGateway({ namespace: '/', cors: true })
-export class AppGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
-  constructor() {}
-  @WebSocketServer() server: Server;
-  private logger: Logger = new Logger('AppGateway');
+@WebSocketGateway({
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  },
+})
+export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server: Server;
 
-  afterInit(server: Server) {
-    this.logger.log('WebSocket Init....');
+  handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
   }
 
-  handleDisconnect(socket: Socket) {
-    this.logger.log(`Client disconnected: ${socket.id}`);
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
   }
 
-  async handleConnection(socket: Socket, ...args: any[]) {
-    console.log('ME NOW: ', socket.id);
-    socket.emit('conn-success', {
-      socketId: socket.id,
-      auth: socket.handshake.headers.authorization,
-    });
+  @SubscribeMessage('createTask')
+  handleCreateTask(client: Socket, task: Task) {
+    this.server.emit('taskCreated', task);
+  }
+
+  @SubscribeMessage('updateTask')
+  handleUpdateTask(client: Socket, task: Task) {
+    this.server.emit('taskUpdated', task);
   }
 }
