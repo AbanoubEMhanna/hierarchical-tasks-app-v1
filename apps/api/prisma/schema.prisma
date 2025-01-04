@@ -19,7 +19,8 @@ model User {
   email    String   @unique
   name     String
   password String
-  tasks    Task[]
+  ownedTasks Task[] @relation("TaskOwner")
+  tasks      Task[] @relation("TaskUser")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -28,7 +29,7 @@ model Task {
   id                  Int       @id @default(autoincrement())
   name                String
   description         String?   @db.Text
-  owner               String
+  ownerId             Int
   startDate           DateTime
   completionPercentage Int
   customFields        Json?     @default("{}")
@@ -36,7 +37,8 @@ model Task {
   parent              Task?     @relation("TaskHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children            Task[]    @relation("TaskHierarchy")
   userId              Int
-  user                User      @relation(fields: [userId], references: [id])
+  user                User      @relation("TaskUser", fields: [userId], references: [id])
+  owner               User      @relation("TaskOwner", fields: [ownerId], references: [id])
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
