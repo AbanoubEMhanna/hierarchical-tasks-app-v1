@@ -19,6 +19,22 @@ export class TasksService {
           connect: { id: currentUser.id },
         },
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
     return task;
   }
@@ -60,6 +76,22 @@ export class TasksService {
     return this.prisma.task.update({
       where: { id },
       data: updateTaskData,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
   }
 

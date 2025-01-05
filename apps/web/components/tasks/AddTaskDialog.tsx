@@ -47,7 +47,13 @@ export default function AddTaskDialog({ open, onClose, parentTask , session}: Ad
         }
       );
 
+      if (!socket.connected) {
+        socket.connect();
+      }
+      
       socket.emit('createTask', newTask);
+      console.log('Emitted createTask event:', newTask);
+      
       toast.success('Task created successfully');
       onClose();
     } catch (error) {

@@ -43,7 +43,7 @@ export default function EditTaskDialog({
     }
 
     try {
-      const { data: newTask } = await axios.patch(
+      const { data: updatedTask } = await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
         {
           ...formData,
@@ -55,12 +55,12 @@ export default function EditTaskDialog({
         }
       );
 
-      socket.emit("createTask", newTask);
-      toast.success("Task created successfully");
+      socket.emit("updateTask", updatedTask);
+      toast.success("Task updated successfully");
       onClose();
     } catch (error) {
-      console.error("Error creating task:", error);
-      toast.error("Failed to create task");
+      console.error("Error updating task:", error);
+      toast.error("Failed to update task");
     }
   };
 

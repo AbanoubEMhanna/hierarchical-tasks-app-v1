@@ -26,9 +26,43 @@ export default function TaskGrid({session}: {session: Session | null}) {
     if (session) {
       fetchTasks();
       fetchUsers();
-      const cleanup = setupWebSocket();
+      
+      // Connect socket if not connected
+      if (!socket.connected) {
+        socket.connect();
+      }
+
+      // Setup socket event listeners
+      const handleTaskCreate = (newTask: Task) => {
+        setTasks(prev => {
+          // If task already exists, don't add it
+          if (prev.find(task => task.id === newTask.id)) {
+            return prev;
+          }
+          return [...prev, newTask];
+        });
+      };
+
+      const handleTaskUpdate = (updatedTask: Task) => {
+        setTasks(prev => prev.map(task => 
+          task.id === updatedTask.id ? updatedTask : task
+        ));
+      };
+
+      const handleTaskDelete = (taskId: number) => {
+        setTasks(prev => prev.filter(task => task.id !== taskId));
+      };
+
+      // Subscribe to events
+      socket.on('taskCreated', handleTaskCreate);
+      socket.on('taskUpdated', handleTaskUpdate);
+      socket.on('taskDeleted', handleTaskDelete);
+
+      // Cleanup function
       return () => {
-        cleanup();
+        socket.off('taskCreated', handleTaskCreate);
+        socket.off('taskUpdated', handleTaskUpdate);
+        socket.off('taskDeleted', handleTaskDelete);
         socket.disconnect();
       };
     }
@@ -74,33 +108,6 @@ export default function TaskGrid({session}: {session: Session | null}) {
       console.error('Error fetching users:', error);
       toast.error(t('Error fetching users'));
     }
-  };
-
-  const setupWebSocket = () => {
-    // Connect socket if not connected
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    // Setup event listeners
-    const handleTaskUpdate = (updatedTask: Task) => {
-      setTasks(prev => prev.map(task => 
-        task.id === updatedTask.id ? updatedTask : task
-      ));
-    };
-
-    const handleTaskCreate = (newTask: Task) => {
-      setTasks(prev => [...prev, newTask]);
-    };
-
-    socket.on('taskUpdated', handleTaskUpdate);
-    socket.on('taskCreated', handleTaskCreate);
-
-    // Return cleanup function
-    return () => {
-      socket.off('taskUpdated', handleTaskUpdate);
-      socket.off('taskCreated', handleTaskCreate);
-    };
   };
 
   const handleEditTask = (task: Task) => {
