@@ -1,5 +1,6 @@
 "use client";
 
+import { User } from 'next-auth';
 import { Task } from '../../types/task';
 
 interface TaskActionsProps {
@@ -7,6 +8,7 @@ interface TaskActionsProps {
   onEdit: () => void;
   onAddSubtask: () => void;
   onDelete: () => void;
+  users: User[]
 }
 
 export default function TaskActions({ task, onEdit, onAddSubtask , onDelete }: TaskActionsProps) {

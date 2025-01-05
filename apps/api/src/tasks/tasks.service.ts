@@ -5,7 +5,7 @@ import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
   async create(currentUser: User, createTaskDto: CreateTaskDto) {
     const isoDate = new Date(createTaskDto.startDate).toISOString();
     const task = await this.prisma.task.create({
@@ -53,9 +53,13 @@ export class TasksService {
     if (task.ownerId !== currentUser.id && task.userId !== currentUser.id) {
       throw new ForbiddenException('You are not allowed to update this task');
     }
+    let updateTaskData = {
+      ...updateTaskDto,
+      startDate: updateTaskDto.startDate ? new Date(updateTaskDto.startDate).toISOString() : undefined,
+    };
     return this.prisma.task.update({
       where: { id },
-      data: updateTaskDto,
+      data: updateTaskData,
     });
   }
 

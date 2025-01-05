@@ -9,20 +9,23 @@ import AddTaskDialog from './AddTaskDialog';
 import CustomFieldsDialog from './CustomFieldsDialog';
 import RTLWrapper from '../../components/RTLWrapper';
 import { toast } from 'react-toastify';
-import { Session } from 'next-auth';
+import { Session, User } from 'next-auth';
 import axios from 'axios';
+import EditTaskDialog from './EditTaskDialog';
 
 export default function TaskGrid({session}: {session: Session | null}) {
   const { t, i18n } = useTranslation();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openCustomFieldsDialog, setOpenCustomFieldsDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
+  const [users, setUsers] = useState<User[]>([]);
   useEffect(() => {
     if (session) {
       fetchTasks();
+      fetchUsers();
       const cleanup = setupWebSocket();
       return () => {
         cleanup();
@@ -54,6 +57,25 @@ export default function TaskGrid({session}: {session: Session | null}) {
     }
   };
 
+  const fetchUsers = async () => {
+    if (!session?.user?.accessToken) {
+      console.error('No access token found');
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${session.user.accessToken}`,
+        },
+      });
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error(t('Error fetching users'));
+    }
+  };
+
   const setupWebSocket = () => {
     // Connect socket if not connected
     if (!socket.connected) {
@@ -82,8 +104,9 @@ export default function TaskGrid({session}: {session: Session | null}) {
   };
 
   const handleEditTask = (task: Task) => {
+    console.log(task);
     setSelectedTask(task);
-    setOpenAddDialog(true);
+    setOpenEditDialog(true);
   };
 
   const handleAddSubtask = (parentTask: Task) => {
@@ -153,6 +176,7 @@ export default function TaskGrid({session}: {session: Session | null}) {
             onEdit={() => handleEditTask(task)}
             onAddSubtask={() => handleAddSubtask(task)}
             onDelete={() => handleDeleteTask(task.id)}
+            users={users}
           />
         </td>
       </tr>
@@ -237,6 +261,20 @@ export default function TaskGrid({session}: {session: Session | null}) {
           }}
           parentTask={selectedTask}
         />
+        {selectedTask && (
+          <EditTaskDialog
+            session={session}
+            open={openEditDialog}
+          onClose={() => {
+            setOpenEditDialog(false);
+            setSelectedTask(null);
+            fetchTasks();
+          }}
+            task={selectedTask}
+            parentTask={selectedTask}
+            users={users}
+          />
+        )}
 
         <CustomFieldsDialog
           open={openCustomFieldsDialog}
