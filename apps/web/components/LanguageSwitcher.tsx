@@ -10,18 +10,13 @@ export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
   const handleLanguageChange = (newLang: string) => {
-    // Get the current path segments
     const segments = pathname.split('/');
-    // Replace the language segment (first segment after empty string)
     segments[1] = newLang;
-    // Construct new path
     const newPath = segments.join('/');
-    
     document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000`;
     router.push(newPath);
   };
 
-  // Get the current language from the URL path
   const currentLang = pathname.split('/')[1] || 'en';
 
   return (

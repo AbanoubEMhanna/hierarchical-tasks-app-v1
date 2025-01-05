@@ -28,7 +28,6 @@ async function bootstrap() {
 
   const logger = new Logger('Bootstrap');
 
-  // Validation pipe
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableShutdownHooks();

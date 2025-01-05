@@ -27,15 +27,12 @@ export default function TaskGrid({session}: {session: Session | null}) {
       fetchTasks();
       fetchUsers();
       
-      // Connect socket if not connected
       if (!socket.connected) {
         socket.connect();
       }
 
-      // Setup socket event listeners
       const handleTaskCreate = (newTask: Task) => {
         setTasks(prev => {
-          // If task already exists, don't add it
           if (prev.find(task => task.id === newTask.id)) {
             return prev;
           }
@@ -53,12 +50,10 @@ export default function TaskGrid({session}: {session: Session | null}) {
         setTasks(prev => prev.filter(task => task.id !== taskId));
       };
 
-      // Subscribe to events
       socket.on('taskCreated', handleTaskCreate);
       socket.on('taskUpdated', handleTaskUpdate);
       socket.on('taskDeleted', handleTaskDelete);
 
-      // Cleanup function
       return () => {
         socket.off('taskCreated', handleTaskCreate);
         socket.off('taskUpdated', handleTaskUpdate);
@@ -147,7 +142,7 @@ export default function TaskGrid({session}: {session: Session | null}) {
         <td className="px-6 py-4 whitespace-nowrap" style={{ paddingLeft: `${level * 2 + 1.5}rem` }}>
           <div className="flex items-center">
             {level > 0 && (
-              <span className="mr-2 text-gray-400">└─</span>
+              <span className="m-2 text-gray-400"> |─── </span>
             )}
             {task.name}
           </div>
@@ -284,6 +279,7 @@ export default function TaskGrid({session}: {session: Session | null}) {
         <CustomFieldsDialog
           open={openCustomFieldsDialog}
           onClose={() => setOpenCustomFieldsDialog(false)}
+          session={session}
         />
 
         {loading && (

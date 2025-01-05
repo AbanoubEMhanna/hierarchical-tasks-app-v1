@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import { CustomField } from '../../types/task';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { Session } from 'next-auth';
 
 interface CustomFieldsDialogProps {
   open: boolean;
   onClose: () => void;
+  session: Session | null;
 }
 
 type FieldType = 'TEXT' | 'NUMBER' | 'DATE' | 'DROPDOWN';
 
-export default function CustomFieldsDialog({ open, onClose }: CustomFieldsDialogProps) {
+export default function CustomFieldsDialog({ open, onClose, session }: CustomFieldsDialogProps) {
   const { t } = useTranslation();
   const [fields, setFields] = useState<CustomField[]>([]);
   const [newField, setNewField] = useState({
@@ -21,16 +25,88 @@ export default function CustomFieldsDialog({ open, onClose }: CustomFieldsDialog
     options: '',
   });
 
-  const handleAddField = () => {
-    const field: CustomField = {
-      id: Date.now(),
-      name: newField.name,
-      type: newField.type,
-      isRequired: newField.isRequired,
-      options: newField.type === 'DROPDOWN' ? newField.options.split(',').map(o => o.trim()) : undefined,
-    };
-    setFields([...fields, field]);
-    setNewField({ name: '', type: 'TEXT' as FieldType, isRequired: false, options: '' });
+  useEffect(() => {
+    if (open) {
+      fetchCustomFields();
+    }
+  }, [open]);
+
+  const fetchCustomFields = async () => {
+    if (!session?.user?.accessToken) {
+      toast.error('Authentication token not found');
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/custom-fields`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.user.accessToken}`,
+          },
+        }
+      );
+      setFields(data);
+    } catch (error) {
+      console.error('Error fetching custom fields:', error);
+      toast.error('Failed to fetch custom fields');
+    }
+  };
+
+  const handleAddField = async () => {
+    if (!session?.user?.accessToken) {
+      toast.error('Authentication token not found');
+      return;
+    }
+
+    try {
+      const fieldData = {
+        name: newField.name,
+        type: newField.type,
+        options: newField.type === 'DROPDOWN' ? newField.options.split(',').map(o => o.trim()) : undefined,
+      };
+
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/custom-fields`,
+        fieldData,
+        {
+          headers: {
+            Authorization: `Bearer ${session.user.accessToken}`,
+          },
+        }
+      );
+
+      setFields([...fields, data]);
+      setNewField({ name: '', type: 'TEXT', isRequired: false, options: '' });
+      toast.success('Custom field added successfully');
+    } catch (error) {
+      console.error('Error adding custom field:', error);
+      toast.error('Failed to add custom field');
+    }
+  };
+
+  const handleDeleteField = async (id: number) => {
+    if (!session?.user?.accessToken) {
+      toast.error('Authentication token not found');
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_API_URL}/custom-fields/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.user.accessToken}`,
+          },
+        }
+      );
+
+      setFields(fields.filter(f => f.id !== id));
+      toast.success('Custom field deleted successfully');
+    } catch (error) {
+      console.error('Error deleting custom field:', error);
+      toast.error('Failed to delete custom field');
+    }
   };
 
   if (!open) return null;
@@ -53,7 +129,7 @@ export default function CustomFieldsDialog({ open, onClose }: CustomFieldsDialog
               />
               <select
                 value={newField.type}
-                onChange={(e) => setNewField({ ...newField, type: e.target.value as any })}
+                onChange={(e) => setNewField({ ...newField, type: e.target.value as FieldType })}
                 className="p-2 border border-gray-300 rounded"
               >
                 <option value="TEXT">{t('Text')}</option>
@@ -70,17 +146,6 @@ export default function CustomFieldsDialog({ open, onClose }: CustomFieldsDialog
                   className="p-2 border border-gray-300 rounded col-span-2"
                 />
               )}
-              <div className="col-span-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={newField.isRequired}
-                    onChange={(e) => setNewField({ ...newField, isRequired: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span>{t('Required Field')}</span>
-                </label>
-              </div>
             </div>
             <button
               onClick={handleAddField}
@@ -99,12 +164,14 @@ export default function CustomFieldsDialog({ open, onClose }: CustomFieldsDialog
                   <div>
                     <span className="font-medium">{field.name}</span>
                     <span className="ml-2 text-sm text-gray-500">({field.type})</span>
-                    {field.isRequired && (
-                      <span className="ml-2 text-sm text-red-500">*</span>
+                    {field.options && (
+                      <span className="ml-2 text-sm text-gray-500">
+                        [{field.options.join(', ')}]
+                      </span>
                     )}
                   </div>
                   <button
-                    onClick={() => setFields(fields.filter(f => f.id !== field.id))}
+                    onClick={() => handleDeleteField(field.id)}
                     className="text-red-500 hover:text-red-600"
                   >
                     {t('Remove')}

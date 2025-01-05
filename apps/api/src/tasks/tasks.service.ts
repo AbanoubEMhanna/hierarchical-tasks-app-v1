@@ -13,8 +13,8 @@ export class TasksService {
         name: createTaskDto.name,
         description: createTaskDto.description,
         startDate: isoDate,
-        parentId: createTaskDto.parentId || null, // Use parentId directly
-        userId: currentUser.id,     // Use direct ID assignment
+        parentId: createTaskDto.parentId || null,
+        userId: currentUser.id,
         ownerId: currentUser.id,
         completionPercentage: createTaskDto.completionPercentage,
       },

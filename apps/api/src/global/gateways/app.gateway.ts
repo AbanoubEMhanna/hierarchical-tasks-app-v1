@@ -39,9 +39,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('createTask')
   handleCreateTask(client: Socket, task: Task) {
     this.logger.log(`Task created by ${client.id}:`, task);
-    // Broadcast to all clients except sender
     client.broadcast.emit('taskCreated', task);
-    // Also send back to sender to confirm
     client.emit('taskCreated', task);
   }
 

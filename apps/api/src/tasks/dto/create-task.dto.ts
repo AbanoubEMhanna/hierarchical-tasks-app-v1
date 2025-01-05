@@ -1,51 +1,72 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Prisma } from "@prisma/client";
-import { Type } from "class-transformer";
-import { IsDate, IsDefined, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
-import { IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
-export class CreateTaskDto implements Omit<Prisma.TaskCreateInput , 'user' | 'owner'>{
-    @ApiProperty({
-        description: 'The name of the task',
-        example: 'Task 1',
-    })
-    @IsString()
-    @IsDefined()
-    @IsNotEmpty()
-    name: string;
+export class CreateTaskDto {
+  @ApiProperty({
+    description: 'The name of the task',
+    example: 'Implement login feature',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @ApiProperty({
-        description: 'The start date of the task',
-        example: '2021-01-01',
-    })
-    @Type(() => Date)
-    @IsDate()
-    @IsDefined()
-    @IsNotEmpty()
-    startDate: Date;
+  @ApiProperty({
+    description: 'The description of the task',
+    example: 'Implement user authentication with JWT',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @ApiProperty({
-        description: 'The completion percentage of the task',
-        example: 50,
-    })
-    @IsNumber()
-    @IsDefined()
-    @IsNotEmpty()
-    completionPercentage: number;
+  @ApiProperty({
+    description: 'The ID of the task owner',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  ownerId: number;
 
-    @ApiPropertyOptional({
-        description: 'The description of the task',
-        example: 'This is a task description',
-    })
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @ApiProperty({
+    description: 'The start date of the task',
+    example: '2024-01-01',
+  })
+  @IsString()
+  @IsNotEmpty()
+  startDate: string;
 
-    @ApiPropertyOptional({
-        description: 'The parent task id',
-        example: 1,
-    })
-    @IsNumber()
-    @IsOptional()
-    parentId?: number;
+  @ApiProperty({
+    description: 'The completion percentage of the task',
+    example: 50,
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsNotEmpty()
+  completionPercentage: number;
+
+  @ApiProperty({
+    description: 'The ID of the parent task',
+    example: 1,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  parentId?: number;
+
+  @ApiProperty({
+    description: 'The ID of the assigned user',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+
+  @ApiProperty({
+    description: 'Custom field values',
+    example: { priority: 'High', dueDate: '2024-02-01' },
+    required: false,
+  })
+  @IsOptional()
+  customFields?: Record<string, any>;
 }

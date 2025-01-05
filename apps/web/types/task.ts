@@ -2,24 +2,19 @@ export interface Task {
   id: number;
   name: string;
   description?: string;
-  owner: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  startDate: string;
+  completionPercentage: number;
+  parentId?: number;
+  children?: Task[];
   user: {
     id: number;
     name: string;
-    email: string;
   };
-  userId: number;
-  ownerId: number;
-  startDate: string;
-  completionPercentage: number;
+  owner: {
+    id: number;
+    name: string;
+  };
   customFields?: Record<string, any>;
-  parentId?: number;
-  children?: Task[];
-  path?: string[];
 }
 
 export interface CustomField {
@@ -27,5 +22,4 @@ export interface CustomField {
   name: string;
   type: 'TEXT' | 'NUMBER' | 'DATE' | 'DROPDOWN';
   options?: string[];
-  isRequired: boolean;
 } 
