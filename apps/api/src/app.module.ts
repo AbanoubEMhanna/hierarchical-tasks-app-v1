@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { GlobalModule } from './global/global.module';
 import { TasksModule } from './tasks/tasks.module';
+import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TasksModule } from './tasks/tasks.module';
     AuthModule,
     GlobalModule,
     TasksModule,
+    CustomFieldsModule,
   ],
   controllers: [],
   providers: [],
