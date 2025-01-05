@@ -1,34 +1,59 @@
-import { Logger } from '@nestjs/common';
 import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
-  WebSocketGateway,
-  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Task } from '@prisma/client';
+import { Logger } from '@nestjs/common';
 
-@WebSocketGateway({ namespace: '/', cors: true })
-export class AppGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
-  constructor() {}
-  @WebSocketServer() server: Server;
-  private logger: Logger = new Logger('AppGateway');
+@WebSocketGateway({
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+    methods: ['GET', 'POST'],
+  },
+  transports: ['websocket', 'polling'],
+})
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  private readonly logger = new Logger(AppGateway.name);
 
-  afterInit(server: Server) {
-    this.logger.log('WebSocket Init....');
+  @WebSocketServer()
+  server: Server;
+
+  afterInit() {
+    this.logger.log('WebSocket Gateway initialized');
   }
 
-  handleDisconnect(socket: Socket) {
-    this.logger.log(`Client disconnected: ${socket.id}`);
+  handleConnection(client: Socket) {
+    this.logger.log(`Client connected: ${client.id}`);
   }
 
-  async handleConnection(socket: Socket, ...args: any[]) {
-    console.log('ME NOW: ', socket.id);
-    socket.emit('conn-success', {
-      socketId: socket.id,
-      auth: socket.handshake.headers.authorization,
-    });
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+  }
+
+  @SubscribeMessage('createTask')
+  handleCreateTask(client: Socket, task: Task) {
+    this.logger.log(`Task created by ${client.id}:`, task);
+    client.broadcast.emit('taskCreated', task);
+    client.emit('taskCreated', task);
+  }
+
+  @SubscribeMessage('updateTask')
+  handleUpdateTask(client: Socket, task: Task) {
+    this.logger.log(`Task updated by ${client.id}:`, task);
+    client.broadcast.emit('taskUpdated', task);
+    client.emit('taskUpdated', task);
+  }
+
+  @SubscribeMessage('deleteTask')
+  handleDeleteTask(client: Socket, taskId: number) {
+    this.logger.log(`Task deleted by ${client.id}:`, taskId);
+    client.broadcast.emit('taskDeleted', taskId);
+    client.emit('taskDeleted', taskId);
   }
 }

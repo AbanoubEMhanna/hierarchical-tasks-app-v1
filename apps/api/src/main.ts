@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { Swagger } from './common/utils/swagger';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import * as morgan from 'morgan';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -20,12 +21,13 @@ async function bootstrap() {
       crossOriginResourcePolicy: false,
     }),
   );
-
+  app.use(
+    morgan(':method :url :status :res[content-length] - :response-time ms'),
+  );
   const reflector = app.get(Reflector);
 
   const logger = new Logger('Bootstrap');
 
-  // Validation pipe
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableShutdownHooks();

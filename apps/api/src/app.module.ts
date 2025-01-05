@@ -5,6 +5,9 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { GlobalModule } from './global/global.module';
+import { TasksModule } from './tasks/tasks.module';
+import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 
 @Module({
   imports: [
@@ -15,7 +18,10 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    GlobalModule,
+    TasksModule,
+    CustomFieldsModule,
   ],
   controllers: [],
   providers: [],
