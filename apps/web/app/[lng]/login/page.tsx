@@ -29,6 +29,8 @@ export default function Login() {
       });
 
       if (result?.error) {
+        console.log(result);
+        console.log(result.error);
         toast.error(result.error);
       } else {
         router.push('/');

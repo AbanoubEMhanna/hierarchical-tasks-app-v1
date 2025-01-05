@@ -29,9 +29,9 @@ export const authOptions: AuthOptions = {
           return null;
         } catch (error) {
           if (axios.isAxiosError(error)) {
-            throw error.response?.data?.message || "Invalid email or password";
+            throw new Error(error.response?.data?.message || 'An error occurred during authentication');
           }
-          return null;
+          throw new Error('An unexpected error occurred');
         }
       },
     }),
