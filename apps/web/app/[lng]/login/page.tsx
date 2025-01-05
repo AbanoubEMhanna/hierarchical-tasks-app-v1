@@ -10,7 +10,7 @@ import LanguageSwitcher from '../../../components/LanguageSwitcher';
 
 export default function Login() {
   const router = useRouter();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
