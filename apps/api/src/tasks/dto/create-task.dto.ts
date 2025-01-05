@@ -40,4 +40,12 @@ export class CreateTaskDto implements Omit<Prisma.TaskCreateInput , 'user' | 'ow
     @IsString()
     @IsOptional()
     description?: string;
+
+    @ApiPropertyOptional({
+        description: 'The parent task id',
+        example: 1,
+    })
+    @IsNumber()
+    @IsOptional()
+    parentId?: number;
 }

@@ -10,14 +10,13 @@ export class TasksService {
     const isoDate = new Date(createTaskDto.startDate).toISOString();
     const task = await this.prisma.task.create({
       data: {
-        ...createTaskDto,
+        name: createTaskDto.name,
+        description: createTaskDto.description,
         startDate: isoDate,
-        user: {
-          connect: { id: currentUser.id },
-        },
-        owner: {
-          connect: { id: currentUser.id },
-        },
+        parentId: createTaskDto.parentId || null, // Use parentId directly
+        userId: currentUser.id,     // Use direct ID assignment
+        ownerId: currentUser.id,
+        completionPercentage: createTaskDto.completionPercentage,
       },
       include: {
         user: {
@@ -32,6 +31,15 @@ export class TasksService {
             id: true,
             name: true,
             email: true,
+          },
+        },
+        parent: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            startDate: true,
+            completionPercentage: true,
           },
         },
       },
@@ -56,6 +64,39 @@ export class TasksService {
             email: true,
           },
         },
+        parent: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            startDate: true,
+            completionPercentage: true,
+          },
+        },
+        children: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            startDate: true,
+            completionPercentage: true,
+            parentId: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            },
+            owner: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          },
+        }
       },
     });
   }
@@ -97,6 +138,7 @@ export class TasksService {
 
   async remove(id: number, currentUser: User) {
     const task = await this.prisma.task.findUnique({ where: { id } });
+    console.log("🚀 ~ TasksService ~ remove ~ task:", task)
     if (task.ownerId !== currentUser.id && task.userId !== currentUser.id) {
       throw new ForbiddenException('You are not allowed to delete this task');
     }

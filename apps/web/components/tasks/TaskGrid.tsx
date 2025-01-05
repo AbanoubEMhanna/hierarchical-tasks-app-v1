@@ -133,10 +133,8 @@ export default function TaskGrid({session}: {session: Session | null}) {
           Authorization: `Bearer ${session.user.accessToken}`,
         },
       });
-      
-      // Remove task from local state
-      setTasks(prev => prev.filter(task => task.id !== taskId));
       toast.success(t('Task deleted successfully'));
+      fetchTasks();
     } catch (error) {
       console.error('Error deleting task:', error);
       toast.error(t('Error deleting task'));
